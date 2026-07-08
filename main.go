@@ -19,6 +19,21 @@ func NewPassword(name, value, category string) Password {
 		LastModified: time.Now(),
 	}
 }
+
+type PasswordManager struct {
+	Passwords     map[string]Password `json:"passwords"`
+	masterKey     []byte
+	filePath      string
+	isInitialized bool
+}
+
+func NewPasswordManager(filePath string) *PasswordManager {
+	return &PasswordManager{
+		Passwords: make(map[string]Password),
+		filePath:  filePath,
+	}
+}
+
 func main() {
 
 }
