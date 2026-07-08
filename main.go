@@ -29,7 +29,7 @@ type PasswordManager struct {
 
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
-		Passwords: make(map[string]Password),
+		passwords: make(map[string]Password),
 		filePath:  filePath,
 	}
 }
