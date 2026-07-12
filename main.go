@@ -72,6 +72,20 @@ func (pm *PasswordManager) GetPassword(name string) (Password, error) {
 	return pm.passwords[name], nil
 }
 
+func (pm *PasswordManager) ListPasswords() []Password {
+	var listPasswords []Password
+
+	for name := range pm.passwords {
+		listPasswords = append(listPasswords, pm.passwords[name])
+	}
+
+	if len(listPasswords) == 0 {
+		return []Password{}
+	}
+
+	return listPasswords
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
