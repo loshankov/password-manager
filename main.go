@@ -60,6 +60,18 @@ func (pm *PasswordManager) SavePassword(name, value, category string) error {
 	return nil
 }
 
+func (pm *PasswordManager) GetPassword(name string) (Password, error) {
+	if pm.isInitialized == false {
+		return Password{}, fmt.Errorf("password is not initialized")
+	}
+
+	if _, exist := pm.passwords[name]; exist == false {
+		return Password{}, fmt.Errorf("password not found")
+	}
+
+	return pm.passwords[name], nil
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
