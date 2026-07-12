@@ -44,6 +44,22 @@ func (pm *PasswordManager) SetMasterPassword(masterPassword string) error {
 	return nil
 }
 
+func (pm *PasswordManager) SavePassword(name, value, category string) error {
+	if pm.isInitialized == false {
+		return fmt.Errorf("password manager not initialized")
+	}
+
+	if _, ok := pm.passwords[name]; ok == true {
+		return fmt.Errorf("password already exists")
+	}
+
+	password := NewPassword(name, value, category)
+
+	pm.passwords[name] = password
+
+	return nil
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
