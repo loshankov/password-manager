@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Password struct {
 	Name         string    `json:"name"`
@@ -25,6 +28,18 @@ type PasswordManager struct {
 	masterKey     []byte              `json:"-"`
 	filePath      string              `json:"-"`
 	isInitialized bool                `json:"-"`
+}
+
+func (pm *PasswordManager) SetMasterPassword(masterPassword string) error {
+	if len([]rune(masterPassword)) < 8 {
+		return fmt.Errorf("password is too week")
+	}
+
+	keyBuffer := make([]byte, 32)
+	copy(keyBuffer, masterPassword)
+
+	pm.masterKey = keyBuffer
+	pm.isInitialized = true
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
