@@ -40,6 +40,8 @@ func (pm *PasswordManager) SetMasterPassword(masterPassword string) error {
 
 	pm.masterKey = keyBuffer
 	pm.isInitialized = true
+
+	return nil
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
