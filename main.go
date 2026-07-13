@@ -160,6 +160,53 @@ func (pm *PasswordManager) SaveToFile() error {
 	return nil
 }
 
+func (pm *PasswordManager) LoadFromFile() error {
+	if pm.isInitialized == false {
+		return fmt.Errorf("password manager not initialized")
+	}
+
+	file, err := os.Open(pm.filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	block, err := aes.NewCipher(pm.masterKey)
+	if err != nil {
+		return fmt.Errorf("cipher block not created")
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return fmt.Errorf("gcm not created")
+	}
+
+	nonceSize := gcm.NonceSize()
+	bufferPassword := make([]byte, nonceSize)
+
+	_, err = io.ReadFull(file, bufferPassword)
+	if err != nil {
+		return err
+	}
+
+	authData, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	gcmOpen, err := gcm.Open(nil, bufferPassword, authData, nil)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(gcmOpen, &pm.passwords)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
