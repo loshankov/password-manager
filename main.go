@@ -2,8 +2,13 @@ package main
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"time"
 )
 
@@ -64,7 +69,7 @@ func (pm *PasswordManager) SavePassword(name, value, category string) error {
 
 func (pm *PasswordManager) GetPassword(name string) (Password, error) {
 	if pm.isInitialized == false {
-		return Password{}, fmt.Errorf("password is not initialized")
+		return Password{}, fmt.Errorf("password manager not initialized")
 	}
 
 	if _, exist := pm.passwords[name]; exist == false {
@@ -107,6 +112,52 @@ func (pm *PasswordManager) GeneratePassword(length int) (string, error) {
 	}
 
 	return resultBuffer.String(), nil
+}
+
+func (pm *PasswordManager) SaveToFile() error {
+	if pm.isInitialized == false {
+		return fmt.Errorf("password manager not initialized")
+	}
+
+	passwords, err := json.Marshal(pm.passwords)
+	if err != nil {
+		return err
+	}
+
+	block, err := aes.NewCipher(pm.masterKey)
+	if err != nil {
+		return fmt.Errorf("cipher block not created")
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return fmt.Errorf("gcm not created")
+	}
+	nonceSize := gcm.NonceSize()
+	bufferPassword := make([]byte, nonceSize)
+
+	_, err = io.ReadFull(rand.Reader, bufferPassword)
+	if err != nil {
+		return err
+	}
+	gsmSeal := gcm.Seal(nil, bufferPassword, passwords, nil)
+
+	file, err := os.Create(pm.filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write(bufferPassword)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(gsmSeal)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
