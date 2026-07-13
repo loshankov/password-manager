@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"crypto/rand"
 	"fmt"
 	"time"
 )
@@ -32,7 +34,7 @@ type PasswordManager struct {
 
 func (pm *PasswordManager) SetMasterPassword(masterPassword string) error {
 	if len([]rune(masterPassword)) < 8 {
-		return fmt.Errorf("password is too week")
+		return fmt.Errorf("password is too weak")
 	}
 
 	keyBuffer := make([]byte, 32)
@@ -84,6 +86,27 @@ func (pm *PasswordManager) ListPasswords() []Password {
 	}
 
 	return listPasswords
+}
+
+func (pm *PasswordManager) GeneratePassword(length int) (string, error) {
+	if length < 8 {
+		return "", fmt.Errorf("password is too weak")
+	}
+
+	passwordCharacters := "abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+~<>?:}{|'/.,;'"
+	passwordBuffer := make([]byte, length)
+	_, err := rand.Read(passwordBuffer)
+	if err != nil {
+		return "", err
+	}
+
+	var resultBuffer bytes.Buffer
+	for _, b := range passwordBuffer {
+		index := int(b) % len(passwordCharacters)
+		resultBuffer.WriteString(string([]rune(passwordCharacters)[index]))
+	}
+
+	return resultBuffer.String(), nil
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
