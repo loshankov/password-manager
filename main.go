@@ -241,6 +241,18 @@ func (pm *PasswordManager) CheckPasswordStrength(password string) error {
 	return nil
 }
 
+func (pm *PasswordManager) GetPasswordsByCategory(category string) []Password {
+	var result []Password
+
+	for _, p := range pm.passwords {
+		if p.Category == category {
+			result = append(result, p)
+		}
+	}
+
+	return result
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
