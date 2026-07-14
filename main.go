@@ -309,10 +309,10 @@ func (pm *PasswordManager) DeletePassword(name string) error {
 }
 
 func (pm *PasswordManager) ListCategories() []string {
-	uniqueCategories := make(map[string]struct{})
+	uniqueCategories := make(map[string]bool)
 
 	for _, p := range pm.passwords {
-		uniqueCategories[p.Category] = struct{}{}
+		uniqueCategories[p.Category] = true
 	}
 
 	return slices.Collect(maps.Keys(uniqueCategories))
