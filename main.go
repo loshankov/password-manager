@@ -292,6 +292,20 @@ func (pm *PasswordManager) UpdatePassword(name, newValue string) error {
 	return nil
 }
 
+func (pm *PasswordManager) DeletePassword(name string) error {
+	if pm.isInitialized == false {
+		return fmt.Errorf("password manager not initialized")
+	}
+
+	if _, ok := pm.passwords[name]; !ok {
+		return fmt.Errorf("password not found")
+	}
+
+	delete(pm.passwords, name)
+
+	return nil
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
