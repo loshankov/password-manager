@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -202,6 +203,39 @@ func (pm *PasswordManager) LoadFromFile() error {
 	err = json.Unmarshal(gcmOpen, &pm.passwords)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (pm *PasswordManager) CheckPasswordStrength(password string) error {
+	if len([]rune(password)) < 8 {
+		return fmt.Errorf("password is too weak")
+	}
+
+	var upperDigits = "ABCDEFGHIGKLMNOPQRSTUVWXYZ"
+	var lowDigits = "abcdefghigklmnopqrstuvwxyz"
+	var numbers = "1234567890"
+	var symbols = "!@#$%^&*()_+~<>?:}{|'/.,;"
+
+	var useUpperDigits, useLowDigits, useNumbers, useSymbols bool
+
+	for _, r := range password {
+		if strings.ContainsRune(upperDigits, r) {
+			useUpperDigits = true
+		}
+		if strings.ContainsRune(lowDigits, r) {
+			useLowDigits = true
+		}
+		if strings.ContainsRune(numbers, r) {
+			useNumbers = true
+		}
+		if strings.ContainsRune(symbols, r) {
+			useSymbols = true
+		}
+	}
+	if !useUpperDigits || !useLowDigits || !useNumbers || !useSymbols {
+		return fmt.Errorf("password don`t have upper digit or low digit or number or symbol")
 	}
 
 	return nil
