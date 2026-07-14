@@ -26,8 +26,8 @@ func NewPassword(name, value, category string) Password {
 		Name:         name,
 		Value:        value,
 		Category:     category,
-		CreatedAt:    time.Now(),
-		LastModified: time.Now(),
+		CreatedAt:    time.Now().UTC(),
+		LastModified: time.Now().UTC(),
 	}
 }
 
@@ -267,6 +267,29 @@ func (pm *PasswordManager) FindDuplicatePasswords() map[string][]string {
 		}
 	}
 	return resultPasswords
+}
+
+func (pm *PasswordManager) UpdatePassword(name, newValue string) error {
+	if pm.isInitialized == false {
+		return fmt.Errorf("password manager not initialized")
+	}
+
+	if _, ok := pm.passwords[name]; !ok {
+		return fmt.Errorf("password not found")
+	}
+
+	if err := pm.CheckPasswordStrength(newValue); err != nil {
+		return err
+	}
+
+	updatePass := pm.passwords[name]
+
+	updatePass.Value = newValue
+	updatePass.LastModified = time.Now().UTC()
+
+	pm.passwords[name] = updatePass
+
+	return nil
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
