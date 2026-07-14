@@ -8,7 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"os"
+	"slices"
 	"strings"
 	"time"
 )
@@ -304,6 +306,16 @@ func (pm *PasswordManager) DeletePassword(name string) error {
 	delete(pm.passwords, name)
 
 	return nil
+}
+
+func (pm *PasswordManager) ListCategories() []string {
+	uniqueCategories := make(map[string]struct{})
+
+	for _, p := range pm.passwords {
+		uniqueCategories[p.Category] = struct{}{}
+	}
+
+	return slices.Collect(maps.Keys(uniqueCategories))
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
