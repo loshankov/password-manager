@@ -253,6 +253,22 @@ func (pm *PasswordManager) GetPasswordsByCategory(category string) []Password {
 	return result
 }
 
+func (pm *PasswordManager) FindDuplicatePasswords() map[string][]string {
+	passwords := make(map[string][]string)
+	resultPasswords := make(map[string][]string)
+
+	for _, p := range pm.passwords {
+		passwords[p.Value] = append(passwords[p.Value], p.Name)
+	}
+
+	for key, value := range passwords {
+		if len(value) > 1 {
+			resultPasswords[key] = value
+		}
+	}
+	return resultPasswords
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
