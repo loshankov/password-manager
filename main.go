@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
@@ -366,19 +367,26 @@ func clearScreen() { // Очистка экрана
 }
 
 func showSuccess(message string) { // Вывод сообщения об успехе
-	fmt.Printf("✓ Success: ", message)
+	fmt.Printf(colorGreen+"✓ Success: %v"+colorReset, message)
 }
 
 func showError(message string) { // Вывод сообщения об ошибке
-	fmt.Printf("✗ Error: ", message)
+	fmt.Printf(colorRed+"✗ Error: %v"+colorReset, message)
 }
 
 func showInfo(message string) { // Вывод информационного сообщения
-	fmt.Printf("→ Info: ", message)
+	fmt.Printf(colorYellow+"→ Info: %v"+colorReset, message)
 }
 
 func waitForEnter() { // Ожидание нажатия Enter
+	buffer := bufio.NewReader(os.Stdin)
+
 	fmt.Println("Press Enter to continue...")
+	_, err := buffer.ReadString('\n')
+	if err != nil {
+		fmt.Println("error reading input", err)
+	}
+
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
