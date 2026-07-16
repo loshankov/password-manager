@@ -354,6 +354,33 @@ func (pm *PasswordManager) GetPasswordStats() map[string]interface{} {
 	return stats
 }
 
+const (
+	colorRed    = "\033[31m"
+	colorGreen  = "\033[32m"
+	colorYellow = "\033[33m"
+	colorReset  = "\033[0m"
+)
+
+func clearScreen() { // Очистка экрана
+	fmt.Print("\033[H\033[2J")
+}
+
+func showSuccess(message string) { // Вывод сообщения об успехе
+	fmt.Printf("✓ Success: ", message)
+}
+
+func showError(message string) { // Вывод сообщения об ошибке
+	fmt.Printf("✗ Error: ", message)
+}
+
+func showInfo(message string) { // Вывод информационного сообщения
+	fmt.Printf("→ Info: ", message)
+}
+
+func waitForEnter() { // Ожидание нажатия Enter
+	fmt.Println("Press Enter to continue...")
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
