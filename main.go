@@ -348,6 +348,9 @@ func (pm *PasswordManager) GetPasswordStats() map[string]interface{} {
 		}
 	}
 
+	stats["category"] = countByCategories
+	stats["age"] = passwordAge
+
 	return stats
 }
 
