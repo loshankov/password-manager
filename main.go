@@ -318,6 +318,39 @@ func (pm *PasswordManager) ListCategories() []string {
 	return slices.Collect(maps.Keys(uniqueCategories))
 }
 
+func (pm *PasswordManager) GetPasswordStats() map[string]interface{} {
+	stats := make(map[string]interface{})
+	countByCategories := make(map[string]int)
+	passwordAge := make(map[string]time.Time)
+
+	total := len(pm.passwords)
+	stats["total"] = total
+
+	categories := pm.ListCategories()
+
+	for _, cat := range categories {
+		countByCategory := len(pm.GetPasswordsByCategory(cat))
+		countByCategories[cat] = countByCategory
+	}
+
+	for _, p := range pm.passwords {
+		if len(passwordAge) < 1 {
+			passwordAge["newest"] = p.CreatedAt
+			passwordAge["oldest"] = p.CreatedAt
+		}
+
+		if p.CreatedAt.Before(passwordAge["oldest"]) {
+			passwordAge["oldest"] = p.CreatedAt
+		}
+
+		if p.CreatedAt.After(passwordAge["newest"]) {
+			passwordAge["newest"] = p.CreatedAt
+		}
+	}
+
+	return stats
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
