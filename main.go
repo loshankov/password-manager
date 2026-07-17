@@ -398,6 +398,7 @@ func ReadUserInput(prompt string) string {
 	name, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println("error reading input", err)
+		return ""
 	}
 
 	name = strings.TrimSpace(name)
