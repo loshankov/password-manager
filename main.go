@@ -14,6 +14,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"golang.org/x/term"
 )
 
 type Password struct {
@@ -387,6 +389,31 @@ func waitForEnter() { // Ожидание нажатия Enter
 		fmt.Println("error reading input", err)
 	}
 
+}
+
+func ReadUserInput(prompt string) string {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print(prompt)
+	name, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println("error reading input", err)
+	}
+
+	name = strings.TrimSpace(name)
+
+	return name
+}
+
+func readPassword() (string, error) {
+	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
+	if err != nil {
+		return "", fmt.Errorf("error reading password %v", err)
+	}
+	fmt.Println()
+
+	passString := string(pass)
+	return passString, nil
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
