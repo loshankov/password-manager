@@ -417,6 +417,51 @@ func readPassword() (string, error) {
 	return passString, nil
 }
 
+func ShowMainMenu() {
+	clearScreen()
+	fmt.Println(
+		`
+==========================================
+           Password Manager           
+==========================================
+1. Generate new password
+2. Add new password
+3. Get password
+4. List all passwords
+5. Update password
+6. Delete password
+7. List categories
+8. Show password statistics
+9. Find duplicate passwords
+0. Exit
+==========================================`,
+	)
+	fmt.Println()
+}
+
+func ShowPasswordList(passwords []Password) {
+	fmt.Println(`
+=== Password list ===
+Name                 Category        Created             Last Modified
+--------------------------------------------------------------------------------`)
+	for _, p := range passwords {
+		fmt.Printf("%v          %v             %v          %v", p.Name, p.Category, p.CreatedAt, p.LastModified)
+		fmt.Println()
+	}
+
+}
+
+func ShowPasswordDetails(password Password) {
+	fmt.Printf(`
+=== Password details ===
+Service: %v
+Category: %v
+Password: %v
+Created: %v
+Last Modified: %v
+`, password.Name, password.Category, password.Value, password.CreatedAt, password.LastModified)
+}
+
 func NewPasswordManager(filePath string) *PasswordManager {
 	return &PasswordManager{
 		passwords: make(map[string]Password),
@@ -425,5 +470,7 @@ func NewPasswordManager(filePath string) *PasswordManager {
 }
 
 func main() {
-
+	ShowMainMenu()
+	ShowPasswordList([]Password{})
+	ShowPasswordDetails(Password{})
 }
