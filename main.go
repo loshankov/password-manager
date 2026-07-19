@@ -445,10 +445,9 @@ func ShowPasswordList(passwords []Password) {
 Name                 Category        Created             Last Modified
 --------------------------------------------------------------------------------`)
 	for _, p := range passwords {
-		fmt.Printf("%v          %v             %v          %v", p.Name, p.Category, p.CreatedAt, p.LastModified)
+		fmt.Printf("%-21s%-16s%-20s%-20s", p.Name, p.Category, p.CreatedAt.Format(time.DateTime), p.LastModified.Format(time.DateTime))
 		fmt.Println()
 	}
-
 }
 
 func ShowPasswordDetails(password Password) {
@@ -459,7 +458,7 @@ Category: %v
 Password: %v
 Created: %v
 Last Modified: %v
-`, password.Name, password.Category, password.Value, password.CreatedAt, password.LastModified)
+`, password.Name, password.Category, password.Value, password.CreatedAt.Format(time.DateTime), password.LastModified.Format(time.DateTime))
 }
 
 func NewPasswordManager(filePath string) *PasswordManager {
@@ -470,7 +469,12 @@ func NewPasswordManager(filePath string) *PasswordManager {
 }
 
 func main() {
+	pass := NewPassword("test", "123qwe", "testcat")
+	pass1 := NewPassword("test1", "123qwe1", "testcat1")
+	arrPass := make([]Password, 0, 2)
+	arrPass = append(arrPass, pass)
+	arrPass = append(arrPass, pass1)
 	ShowMainMenu()
-	ShowPasswordList([]Password{})
-	ShowPasswordDetails(Password{})
+	ShowPasswordList(arrPass)
+	ShowPasswordDetails(pass)
 }
