@@ -439,7 +439,7 @@ func ShowMainMenu() {
 	fmt.Println()
 }
 
-func ShowPasswordList(passwords []Password) {
+func PrintPasswordList(passwords []Password) {
 	fmt.Println(`
 === Password list ===
 Name                 Category        Created             Last Modified
