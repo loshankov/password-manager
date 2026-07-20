@@ -384,7 +384,7 @@ func showInfo(message string) { // Вывод информационного с�
 func waitForEnter() { // Ожидание нажатия Enter
 	buffer := bufio.NewReader(os.Stdin)
 
-	fmt.Println("Press Enter to continue...")
+	fmt.Println("\n\nPress Enter to continue...")
 	_, err := buffer.ReadString('\n')
 	if err != nil {
 		fmt.Println("error reading input", err)
@@ -469,6 +469,7 @@ func NewPasswordManager(filePath string) *PasswordManager {
 }
 
 func HandlePasswordGeneration(pm *PasswordManager) error {
+	clearScreen()
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("=== Password Generation ===\n" +
@@ -489,12 +490,16 @@ func HandlePasswordGeneration(pm *PasswordManager) error {
 		return err
 	}
 
-	fmt.Printf("✓ Success: Password generated successfully\nGenerated password: %s\n\nPress Enter to continue...\n", genPassword)
+	fmt.Printf("Generated password: %s\n", genPassword)
+	showSuccess("Password generated successfully")
+
+	waitForEnter()
 
 	return nil
 }
 
 func HandlePasswordAdd(pm *PasswordManager) error {
+	clearScreen()
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("=== Add New Password ===\n" +
@@ -526,12 +531,16 @@ func HandlePasswordAdd(pm *PasswordManager) error {
 	if err := pm.SavePassword(serviceName, password, categoryName); err != nil {
 		return err
 	}
-	fmt.Print("✓ Success: Password saved successfully\n\nPress Enter to continue...\n")
+
+	showSuccess("Password saved successfully")
+
+	waitForEnter()
 
 	return nil
 }
 
 func HandlePasswordSearch(pm *PasswordManager) error {
+	clearScreen()
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("=== Search Password ===\n" +
@@ -555,10 +564,14 @@ Category: %s
 Password: %s
 Created: %s
 Last Modified: %s`, password.Name, password.Category, password.Value, password.CreatedAt.Format(time.DateTime), password.LastModified.Format(time.DateTime))
+
+	waitForEnter()
+
 	return nil
 }
 
 func HandlePasswordUpdate(pm *PasswordManager) error {
+	clearScreen()
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("=== Update Password ===\n" +
@@ -580,7 +593,9 @@ func HandlePasswordUpdate(pm *PasswordManager) error {
 		return err
 	}
 
-	fmt.Print("✓ Success: Password updated successfully\n\nPress Enter to continue...\n")
+	showSuccess("Password updated successfully")
+
+	waitForEnter()
 
 	return nil
 }
@@ -596,8 +611,8 @@ func main() {
 	//ShowPasswordDetails(pass)
 	pm := NewPasswordManager("\\\\wsl.localhost\\Ubuntu\\home\\user\\dev\\praxis\\password-manager\\newpass")
 	pm.SetMasterPassword("123QW'zzweqwe121")
-	//HandlePasswordAdd(pm)
+	HandlePasswordAdd(pm)
 	//HandlePasswordSearch(pm)
-	HandlePasswordUpdate(pm)
+	//HandlePasswordUpdate(pm)
 	//HandlePasswordGeneration(pm)
 }
