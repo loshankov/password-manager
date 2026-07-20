@@ -12,6 +12,7 @@ import (
 	"maps"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -59,7 +60,7 @@ func (pm *PasswordManager) SetMasterPassword(masterPassword string) error {
 
 func (pm *PasswordManager) SavePassword(name, value, category string) error {
 	if pm.isInitialized == false {
-		return fmt.Errorf("password manager not initialized")
+		return fmt.Errorf("[SavePassword] password manager not initialized")
 	}
 
 	if _, ok := pm.passwords[name]; ok == true {
@@ -75,7 +76,7 @@ func (pm *PasswordManager) SavePassword(name, value, category string) error {
 
 func (pm *PasswordManager) GetPassword(name string) (Password, error) {
 	if pm.isInitialized == false {
-		return Password{}, fmt.Errorf("password manager not initialized")
+		return Password{}, fmt.Errorf("[GetPassword] password manager not initialized")
 	}
 
 	if _, exist := pm.passwords[name]; exist == false {
@@ -83,20 +84,6 @@ func (pm *PasswordManager) GetPassword(name string) (Password, error) {
 	}
 
 	return pm.passwords[name], nil
-}
-
-func (pm *PasswordManager) ListPasswords() []Password {
-	var listPasswords []Password
-
-	for name := range pm.passwords {
-		listPasswords = append(listPasswords, pm.passwords[name])
-	}
-
-	if len(listPasswords) == 0 {
-		return []Password{}
-	}
-
-	return listPasswords
 }
 
 func (pm *PasswordManager) GeneratePassword(length int) (string, error) {
@@ -120,9 +107,23 @@ func (pm *PasswordManager) GeneratePassword(length int) (string, error) {
 	return resultBuffer.String(), nil
 }
 
+func (pm *PasswordManager) ListPasswords() []Password {
+	var listPasswords []Password
+
+	for name := range pm.passwords {
+		listPasswords = append(listPasswords, pm.passwords[name])
+	}
+
+	if len(listPasswords) == 0 {
+		return []Password{}
+	}
+
+	return listPasswords
+}
+
 func (pm *PasswordManager) SaveToFile() error {
 	if pm.isInitialized == false {
-		return fmt.Errorf("password manager not initialized")
+		return fmt.Errorf("[SaveToFile] password manager not initialized")
 	}
 
 	passwords, err := json.Marshal(pm.passwords)
@@ -168,7 +169,7 @@ func (pm *PasswordManager) SaveToFile() error {
 
 func (pm *PasswordManager) LoadFromFile() error {
 	if pm.isInitialized == false {
-		return fmt.Errorf("password manager not initialized")
+		return fmt.Errorf("[LoadFromFile] password manager not initialized")
 	}
 
 	file, err := os.Open(pm.filePath)
@@ -276,7 +277,7 @@ func (pm *PasswordManager) FindDuplicatePasswords() map[string][]string {
 
 func (pm *PasswordManager) UpdatePassword(name, newValue string) error {
 	if pm.isInitialized == false {
-		return fmt.Errorf("password manager not initialized")
+		return fmt.Errorf("[UpdatePassword] password manager not initialized")
 	}
 
 	if _, ok := pm.passwords[name]; !ok {
@@ -299,7 +300,7 @@ func (pm *PasswordManager) UpdatePassword(name, newValue string) error {
 
 func (pm *PasswordManager) DeletePassword(name string) error {
 	if pm.isInitialized == false {
-		return fmt.Errorf("password manager not initialized")
+		return fmt.Errorf("[DeletePassword] password manager not initialized")
 	}
 
 	if _, ok := pm.passwords[name]; !ok {
@@ -409,9 +410,8 @@ func ReadUserInput(prompt string) string {
 func readPassword() (string, error) {
 	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
-		return "", fmt.Errorf("error reading password %v", err)
+		return "", fmt.Errorf("error reading password %v\n", err)
 	}
-	fmt.Println()
 
 	passString := string(pass)
 	return passString, nil
@@ -468,13 +468,136 @@ func NewPasswordManager(filePath string) *PasswordManager {
 	}
 }
 
+func HandlePasswordGeneration(pm *PasswordManager) error {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("=== Password Generation ===\n" +
+		"Enter password length (min 8): ")
+	inputLen, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	inputLen = strings.TrimSpace(inputLen)
+
+	passwordLen, err := strconv.Atoi(inputLen)
+	if err != nil {
+		return err
+	}
+
+	genPassword, err := pm.GeneratePassword(passwordLen)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("✓ Success: Password generated successfully\nGenerated password: %s\n\nPress Enter to continue...\n", genPassword)
+
+	return nil
+}
+
+func HandlePasswordAdd(pm *PasswordManager) error {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("=== Add New Password ===\n" +
+		"Enter service name: ")
+	serviceName, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	serviceName = strings.TrimSpace(serviceName)
+
+	fmt.Print("Enter password (or press Enter to generate): ")
+	password, err := reader.ReadString('\n')
+	password = strings.TrimSpace(password)
+	if password == "" {
+		password, err = pm.GeneratePassword(12)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("→ Info: Generated password: %s\n", password)
+	}
+
+	fmt.Print("Enter category: ")
+	categoryName, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	categoryName = strings.TrimSpace(categoryName)
+
+	if err := pm.SavePassword(serviceName, password, categoryName); err != nil {
+		return err
+	}
+	fmt.Print("✓ Success: Password saved successfully\n\nPress Enter to continue...\n")
+
+	return nil
+}
+
+func HandlePasswordSearch(pm *PasswordManager) error {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("=== Search Password ===\n" +
+		"Enter service name: ")
+	serviceName, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	serviceName = strings.TrimSpace(serviceName)
+
+	password, err := pm.GetPassword(serviceName)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf(`=== Search Password ===
+Enter service name: %s
+Password Details:
+Service: %s
+Category: %s
+Password: %s
+Created: %s
+Last Modified: %s`, password.Name, password.Category, password.Value, password.CreatedAt.Format(time.DateTime), password.LastModified.Format(time.DateTime))
+	return nil
+}
+
+func HandlePasswordUpdate(pm *PasswordManager) error {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("=== Update Password ===\n" +
+		"Enter service name: ")
+	serviceName, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	serviceName = strings.TrimSpace(serviceName)
+
+	fmt.Print("Enter new password: ")
+	newPassword, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	newPassword = strings.TrimSpace(newPassword)
+
+	if err := pm.UpdatePassword(serviceName, newPassword); err != nil {
+		return err
+	}
+
+	fmt.Print("✓ Success: Password updated successfully\n\nPress Enter to continue...\n")
+
+	return nil
+}
+
 func main() {
-	pass := NewPassword("test", "123qwe", "testcat")
-	pass1 := NewPassword("test1", "123qwe1", "testcat1")
-	arrPass := make([]Password, 0, 2)
-	arrPass = append(arrPass, pass)
-	arrPass = append(arrPass, pass1)
-	ShowMainMenu()
-	ShowPasswordList(arrPass)
-	ShowPasswordDetails(pass)
+	//pass := NewPassword("test", "123qwe", "testcat")
+	//pass1 := NewPassword("test1", "123qwe1", "testcat1")
+	//arrPass := make([]Password, 0, 2)
+	//arrPass = append(arrPass, pass)
+	//arrPass = append(arrPass, pass1)
+	//ShowMainMenu()
+	//PrintPasswordList(arrPass)
+	//ShowPasswordDetails(pass)
+	pm := NewPasswordManager("\\\\wsl.localhost\\Ubuntu\\home\\user\\dev\\praxis\\password-manager\\newpass")
+	pm.SetMasterPassword("123QW'zzweqwe121")
+	//HandlePasswordAdd(pm)
+	//HandlePasswordSearch(pm)
+	HandlePasswordUpdate(pm)
+	//HandlePasswordGeneration(pm)
 }
