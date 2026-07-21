@@ -614,6 +614,21 @@ func HandlePasswordUpdate(pm *PasswordManager) error {
 	return nil
 }
 
+func HandleExitAndSave(pm *PasswordManager) error {
+	clearScreen()
+
+	fmt.Println(`=== Saving and Exiting ===
+Saving changes...`)
+
+	if err := pm.SaveToFile(); err != nil {
+		showError("error saving data: permission denied")
+		return err
+	}
+	showSuccess("Changes saved successfully!")
+	showSuccess("Goodbye!")
+	return nil
+}
+
 func main() {
 	//pass := NewPassword("test", "123qwe", "testcat")
 	//pass1 := NewPassword("test1", "123qwe1", "testcat1")
