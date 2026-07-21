@@ -621,7 +621,7 @@ func HandleExitAndSave(pm *PasswordManager) error {
 Saving changes...`)
 
 	if err := pm.SaveToFile(); err != nil {
-		showError("error saving data: permission denied")
+		showError(fmt.Errorf("error saving data: %s", err))
 		return err
 	}
 	showSuccess("Changes saved successfully!")
