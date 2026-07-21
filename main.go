@@ -476,17 +476,20 @@ func HandlePasswordGeneration(pm *PasswordManager) error {
 		"Enter password length (min 8): ")
 	inputLen, err := reader.ReadString('\n')
 	if err != nil {
+		showError(err)
 		return err
 	}
 	inputLen = strings.TrimSpace(inputLen)
 
 	passwordLen, err := strconv.Atoi(inputLen)
 	if err != nil {
+		showError(err)
 		return err
 	}
 
 	genPassword, err := pm.GeneratePassword(passwordLen)
 	if err != nil {
+		showError(err)
 		return err
 	}
 
