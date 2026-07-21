@@ -506,6 +506,7 @@ func HandlePasswordAdd(pm *PasswordManager) error {
 		"Enter service name: ")
 	serviceName, err := reader.ReadString('\n')
 	if err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 	serviceName = strings.TrimSpace(serviceName)
@@ -516,6 +517,7 @@ func HandlePasswordAdd(pm *PasswordManager) error {
 	if password == "" {
 		password, err = pm.GeneratePassword(12)
 		if err != nil {
+			showError(fmt.Sprint(err))
 			return err
 		}
 		fmt.Printf("→ Info: Generated password: %s\n", password)
@@ -524,11 +526,13 @@ func HandlePasswordAdd(pm *PasswordManager) error {
 	fmt.Print("Enter category: ")
 	categoryName, err := reader.ReadString('\n')
 	if err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 	categoryName = strings.TrimSpace(categoryName)
 
 	if err := pm.SavePassword(serviceName, password, categoryName); err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 
@@ -547,14 +551,18 @@ func HandlePasswordSearch(pm *PasswordManager) error {
 		"Enter service name: ")
 	serviceName, err := reader.ReadString('\n')
 	if err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 	serviceName = strings.TrimSpace(serviceName)
 
 	password, err := pm.GetPassword(serviceName)
 	if err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
+
+	showSuccess("Password found")
 
 	fmt.Printf(`=== Search Password ===
 Enter service name: %s
@@ -578,6 +586,7 @@ func HandlePasswordUpdate(pm *PasswordManager) error {
 		"Enter service name: ")
 	serviceName, err := reader.ReadString('\n')
 	if err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 	serviceName = strings.TrimSpace(serviceName)
@@ -585,11 +594,13 @@ func HandlePasswordUpdate(pm *PasswordManager) error {
 	fmt.Print("Enter new password: ")
 	newPassword, err := reader.ReadString('\n')
 	if err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 	newPassword = strings.TrimSpace(newPassword)
 
 	if err := pm.UpdatePassword(serviceName, newPassword); err != nil {
+		showError(fmt.Sprint(err))
 		return err
 	}
 
@@ -613,6 +624,6 @@ func main() {
 	pm.SetMasterPassword("123QW'zzweqwe121")
 	HandlePasswordAdd(pm)
 	//HandlePasswordSearch(pm)
-	//HandlePasswordUpdate(pm)
+	HandlePasswordUpdate(pm)
 	//HandlePasswordGeneration(pm)
 }
